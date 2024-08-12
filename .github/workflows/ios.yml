@@ -102,4 +102,4 @@ jobs:
         uses: actions/upload-artifact@v4.3.6
         with:
           name: ios-latest
-          path: ./${{ runner.temp }}/bajie.xcarchive
+          path: ${{ runner.temp }}/bajie.xcarchive
