@@ -1,0 +1,51 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Wails
+
+on: workflow_dispatch
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: 'bajienetwork/desktop'
+        token: ${{ secrets.PAT }}
+        submodules: recursive
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Set up wails
+      run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+    - name: Set up NodeJS
+      uses: actions/setup-node@v4.0.3
+
+    - name: Set up pnpm
+      run: npm i -g pnpm
+
+    - name: Build macOS
+      run: wails build
+      if: matrix.os == 'macos-latest'
+
+    - name: Build Windows
+      run: |
+        bash ./app/geoip/download.sh
+        wails build -nsis
+      shell: bash
+      if: matrix.os == 'windows-latest'
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: ${{ matrix.os }}
+        path: ./build/bin/*
