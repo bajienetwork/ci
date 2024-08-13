@@ -6,7 +6,12 @@ on:
       fetcher:
         description: '要使用的OSS和管理网站获取器'
         required: true
-        default: 'Bajie'
+        default: 'Feiniao'
+        type: string
+      app_name:
+        description: '应用的名称'
+        required: true
+        default: '飞鸟加速'
         type: string
       app_icon:
         description: '应用图标的URL'
@@ -27,11 +32,40 @@ jobs:
 
       - name: Replace default fetcher
         working-directory: app
+        env:
+          FETCHER_NAME: ${{ inputs.fetcher }}
         run: |
           LAYOUT=_layout.tsx
-          cat "$LAYOUT" | sed 's/{{default fetcher}}/Bajie/' > "$RUNNER_TEMP/$LAYOUT"
+          cat "$LAYOUT" | sed 's/{{default fetcher}}/$FETCHER_NAME/' > "$RUNNER_TEMP/$LAYOUT"
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+
+      - name: Replace app name
+        working-directory: android/app/src/main/res/values
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+        run: |
+          LAYOUT=strings.xml
+          cat "$LAYOUT" | sed 's/{{app name}}/$APP_NAME/' > "$RUNNER_TEMP/$LAYOUT"
+          rm "$LAYOUT"
+          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+
+      - name: Setup ImageMagick
+        uses: mfinelli/setup-imagemagick@v5.0.1
+
+      - name: Manipulate app icon
+        if: ${{ inputs.app_icon != '' }}
+        working-directory: android
+        env:
+          APPICON_URL: ${{ inputs.app_icon }}
+        run: |
+          RESOURCE=$RUNNER_TEMP/appicon
+          curl "$APPICON_URL" -O "$RESOURCE"
+          magick "$RESOURCE" -resize 192x192 app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp
+          magick "$RESOURCE" -resize 143x144 app/src/main/res/mipmap-xxhdpi/ic_launcher.webp
+          magick "$RESOURCE" -resize 96x96 app/src/main/res/mipmap-xhdpi/ic_launcher.webp
+          magick "$RESOURCE" -resize 72x72 app/src/main/res/mipmap-hdpi/ic_launcher.webp
+          magick "$RESOURCE" -resize 48x48 app/src/main/res/mipmap-mdpi/ic_launcher.webp
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
