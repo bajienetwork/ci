@@ -1,6 +1,17 @@
 name: Android CI
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      fetcher:
+        description: '要使用的OSS和管理网站获取器'
+        required: true
+        default: 'Bajie'
+        type: string
+      app_icon:
+        description: '应用图标的URL'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -13,6 +24,14 @@ jobs:
           repository: 'bajienetwork/mobile'
           token: ${{ secrets.PAT }}
           submodules: recursive
+
+      - name: Replace default fetcher
+        working-directory: app
+        run: |
+          LAYOUT=_layout.tsx
+          cat "$LAYOUT" | sed 's/{{default fetcher}}/Bajie/' > "$RUNNER_TEMP/$LAYOUT"
+          rm "$LAYOUT"
+          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
