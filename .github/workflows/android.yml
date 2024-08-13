@@ -60,7 +60,7 @@ jobs:
           APPICON_URL: ${{ inputs.app_icon }}
         run: |
           RESOURCE=$RUNNER_TEMP/appicon
-          curl "$APPICON_URL" -O "$RESOURCE"
+          curl "$APPICON_URL" > "$RESOURCE"
           magick "$RESOURCE" -resize 192x192 app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp
           magick "$RESOURCE" -resize 143x144 app/src/main/res/mipmap-xxhdpi/ic_launcher.webp
           magick "$RESOURCE" -resize 96x96 app/src/main/res/mipmap-xhdpi/ic_launcher.webp
