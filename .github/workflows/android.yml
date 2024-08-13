@@ -124,7 +124,9 @@ jobs:
 
       - name: Place release key
         working-directory: android
-        run: echo ${{ secrets.RELEASE_KEY }} | base64 -d > release.keystore
+        env:
+          RELEASE_KEY: ${{ secrets.RELEASE_KEY }}
+        run: echo "$RELEASE_KEY" | base64 -d > release.keystore
 
       - name: Build meta-alpha release
         working-directory: android
