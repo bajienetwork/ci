@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       fetcher:
-        description: '要使用的OSS和管理网站获取器'
+        description: '地址组'
         required: true
         default: 'Feiniao'
         type: string
