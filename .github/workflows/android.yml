@@ -36,7 +36,7 @@ jobs:
           FETCHER_NAME: ${{ inputs.fetcher }}
         run: |
           LAYOUT=_layout.tsx
-          cat "$LAYOUT" | sed 's/{{default fetcher}}/$FETCHER_NAME/' > "$RUNNER_TEMP/$LAYOUT"
+          cat "$LAYOUT" | sed "s/{{default fetcher}}/$FETCHER_NAME/" > "$RUNNER_TEMP/$LAYOUT"
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
@@ -46,7 +46,7 @@ jobs:
           APP_NAME: ${{ inputs.app_name }}
         run: |
           LAYOUT=strings.xml
-          cat "$LAYOUT" | sed 's/{{app name}}/$APP_NAME/' > "$RUNNER_TEMP/$LAYOUT"
+          cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" > "$RUNNER_TEMP/$LAYOUT"
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
