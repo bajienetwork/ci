@@ -6,12 +6,12 @@ on:
       fetcher:
         description: '地址组'
         required: true
-        default: 'Feiniao'
+        default: 'Kuainiao'
         type: string
       app_name:
         description: '应用的名称'
         required: true
-        default: '飞鸟加速'
+        default: '快鸟加速'
         type: string
       app_icon:
         description: '应用图标的URL'
