@@ -125,6 +125,7 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           CERTIFICATE_NAME: ${{ secrets.CERTIFICATE_NAME }}
+          PACKAGE_NAME: ${{ inputs.package_name }}
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
@@ -143,7 +144,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
           
           # Use codesign to add code signature
-          codesign --force --sign "$CERTIFICATE_NAME" build/bin/Laotie\ Boost.app/
+          codesign --force --sign "$CERTIFICATE_NAME" "build/bin/$PACKAGE_NAME.app"
 
       - name: Build Windows
         run: |
