@@ -51,12 +51,12 @@ jobs:
         mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
     - name: Setup ImageMagick
-      if: matrix.os != 'windows'
       uses: mfinelli/setup-imagemagick@v5.0.1
+      if: matrix.os != 'windows'
 
     - name: Setup ImageMagick (Windows)
-      if: matrix.os == 'windows'
       uses: crazy-max/ghaction-chocolatey@v3.0.0
+      if: matrix.os == 'windows'
       with:
         args: install imagemagick
 
