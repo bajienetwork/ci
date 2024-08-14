@@ -152,6 +152,7 @@ jobs:
         run: |
           tar -czf "$PACKAGE_NAME.tar.gz" "$PACKAGE_NAME.app"
           rm -rf "$PACKAGE_NAME.app"
+        if: matrix.os == 'macos-latest'
 
       - name: Build Windows
         run: |
