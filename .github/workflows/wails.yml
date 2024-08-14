@@ -95,6 +95,7 @@ jobs:
 
       - name: Replace app icons
         working-directory: build
+        shell: bash
         run: |
           cp "$RUNNER_TEMP/mac_icon.png" appicon.png
           cp "$RUNNER_TEMP/windows_icon.ico" windows/icon.ico
