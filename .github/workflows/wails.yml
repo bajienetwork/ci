@@ -145,6 +145,7 @@ jobs:
           
           # Use codesign to add code signature
           codesign --force --sign "$CERTIFICATE_NAME" "build/bin/$PACKAGE_NAME.app"
+        if: matrix.os == 'macos-latest'
 
       - name: Build Windows
         run: |
