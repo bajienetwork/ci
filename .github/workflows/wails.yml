@@ -75,6 +75,7 @@ jobs:
         with:
           repository: 'bajienetwork/desktop'
           token: ${{ secrets.PAT }}
+          submodules: recursive
 
       - name: Replace names
         shell: bash
