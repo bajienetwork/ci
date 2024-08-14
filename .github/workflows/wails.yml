@@ -51,7 +51,14 @@ jobs:
         mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
     - name: Setup ImageMagick
+      if: matrix.os != 'windows'
       uses: mfinelli/setup-imagemagick@v5.0.1
+
+    - name: Setup ImageMagick (Windows)
+      if: matrix.os == 'windows'
+      uses: crazy-max/ghaction-chocolatey@v3.0.0
+      with:
+        args: install imagemagick
 
     - name: Manipulate app icon
       working-directory: build
