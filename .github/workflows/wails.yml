@@ -45,17 +45,21 @@ jobs:
         env:
           APPICON_URL: ${{ inputs.app_icon }}
         run: |
+          PRODUCT_DIR=manipulations
+          mkdir "PRODUCT_DIR"
+          
           RESOURCE=$RUNNER_TEMP/appicon
           CROPPED=$RUNNER_TEMP/cropped.png
           curl "$APPICON_URL" > "$RESOURCE"
           magick "$RESOURCE" -resize 810x810 -matte iconmatte.png -compose DstIn -composite "$CROPPED"
-          magick "$CROPPED" \( +clone -background black -shadow 39x30+0+0 \) +swap -background none -layers merge +repage -gravity center -extent 1024x1024 appicon.png
+          magick "$CROPPED" \( +clone -background black -shadow 39x30+0+0 \) +swap -background none -layers merge +repage -gravity center -extent 1024x1024 "$PRODUCT_DIR/mac.png"
+          magick appicon.png -define icon:auto-resize=16,48,256 -compress zip "$PRODUCT_DIR/windows.ico"
 
       - name: Upload manipulated image
         uses: actions/upload-artifact@v4.3.6
         with:
-          name: appicon
-          path: build/appicon.png
+          name: app_icons
+          path: build/manipulations
 
   build:
     strategy:
@@ -81,11 +85,17 @@ jobs:
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
-      - name: Replace app icon
+      - name: Download app icons
         uses: actions/download-artifact@v4.1.8
         with:
           name: appicon
-          path: build
+          path: build/icons
+
+      - name: Replace app icons
+        working-directory: build
+        run: |
+          cp icons/mac.png appicon.png
+          cp icons/windows.ico windows/icon.ico
 
       - name: Set up Go
         uses: actions/setup-go@v4
