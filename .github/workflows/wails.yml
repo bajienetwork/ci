@@ -3,10 +3,30 @@
 
 name: Wails
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      fetcher:
+        description: '地址组'
+        required: true
+        default: 'kuainiao'
+        type: string
+      app_name:
+        description: '应用的名称'
+        required: true
+        default: '快鸟加速'
+        type: string
+      package_name:
+        description: '打包名称'
+        required: true
+        default: 'Kuainiao Boost'
+        type: string
+      app_icon:
+        description: '应用图标的URL'
+        required: false
+        type: string
 
 jobs:
-
   build:
     strategy:
       matrix:
@@ -18,6 +38,33 @@ jobs:
         repository: 'bajienetwork/desktop'
         token: ${{ secrets.PAT }}
         submodules: recursive
+
+    - name: Replace names
+      shell: bash
+      env:
+        PACKAGE_NAME: ${{ inputs.package_name }}
+        APP_NAME: ${{ inputs.app_name }}
+      run: |
+        LAYOUT=wails.json
+        cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" | sed "s/{{package name}}/$PACKAGE_NAME" > "$RUNNER_TEMP/$LAYOUT"
+        rm "$LAYOUT"
+        mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+
+    - name: Setup ImageMagick
+      uses: mfinelli/setup-imagemagick@v5.0.1
+
+    - name: Manipulate app icon
+      working-directory: build
+      if: ${{ inputs.app_icon != '' }}
+      shell: bash
+      env:
+        APPICON_URL: ${{ inputs.app_icon }}
+      run: |
+        RESOURCE=$RUNNER_TEMP/appicon
+        CROPPED=$RUNNER_TEMP/cropped.png
+        curl "$APPICON_URL" > "$RESOURCE"
+        magick "$RESOURCE" -resize 810x810 -matte iconmatte.png -compose DstIn -composite "$CROPPED"
+        magick "$CROPPED" \( +clone -background black -shadow 39x30+0+0 \) +swap -background none -layers merge +repage -gravity center -extent 1024x1024 appicon.png
 
     - name: Set up Go
       uses: actions/setup-go@v4
