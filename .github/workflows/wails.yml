@@ -116,13 +116,13 @@ jobs:
         run: npm i -g pnpm
 
       - name: Build macOS
-        run: wails build
+        run: wails build -tags ${{ inputs.fetcher }}
         if: matrix.os == 'macos-latest'
 
       - name: Build Windows
         run: |
           bash ./app/geoip/download.sh
-          wails build -nsis
+          wails build -nsis -tags ${{ inputs.fetcher }}
         shell: bash
         if: matrix.os == 'windows-latest'
 
