@@ -27,79 +27,93 @@ on:
         type: string
 
 jobs:
+  appicon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'bajienetwork/desktop'
+          token: ${{ secrets.PAT }}
+
+      - name: Setup ImageMagick
+        uses: mfinelli/setup-imagemagick@v5.0.1
+
+      - name: Manipulate app icon
+        working-directory: build
+        if: ${{ inputs.app_icon != '' }}
+        shell: bash
+        env:
+          APPICON_URL: ${{ inputs.app_icon }}
+        run: |
+          RESOURCE=$RUNNER_TEMP/appicon
+          CROPPED=$RUNNER_TEMP/cropped.png
+          curl "$APPICON_URL" > "$RESOURCE"
+          magick "$RESOURCE" -resize 810x810 -matte iconmatte.png -compose DstIn -composite "$CROPPED"
+          magick "$CROPPED" \( +clone -background black -shadow 39x30+0+0 \) +swap -background none -layers merge +repage -gravity center -extent 1024x1024 appicon.png
+
+      - name: Upload manipulated image
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: appicon
+          path: build/appicon.png
+
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [ macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
+    needs:
+      - appicon
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'bajienetwork/desktop'
-        token: ${{ secrets.PAT }}
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          repository: 'bajienetwork/desktop'
+          token: ${{ secrets.PAT }}
 
-    - name: Replace names
-      shell: bash
-      env:
-        PACKAGE_NAME: ${{ inputs.package_name }}
-        APP_NAME: ${{ inputs.app_name }}
-      run: |
-        LAYOUT=wails.json
-        cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" | sed "s/{{package name}}/$PACKAGE_NAME/" > "$RUNNER_TEMP/$LAYOUT"
-        rm "$LAYOUT"
-        mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+      - name: Replace names
+        shell: bash
+        env:
+          PACKAGE_NAME: ${{ inputs.package_name }}
+          APP_NAME: ${{ inputs.app_name }}
+        run: |
+          LAYOUT=wails.json
+          cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" | sed "s/{{package name}}/$PACKAGE_NAME/" > "$RUNNER_TEMP/$LAYOUT"
+          rm "$LAYOUT"
+          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
-    - name: Setup ImageMagick
-      uses: mfinelli/setup-imagemagick@v5.0.1
-      if: matrix.os != 'windows'
+      - name: Replace app icon
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: appicon
+          path: build/appicon.png
 
-    - name: Setup ImageMagick (Windows)
-      uses: crazy-max/ghaction-chocolatey@v3.0.0
-      if: matrix.os == 'windows'
-      with:
-        args: install imagemagick
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
 
-    - name: Manipulate app icon
-      working-directory: build
-      if: ${{ inputs.app_icon != '' }}
-      shell: bash
-      env:
-        APPICON_URL: ${{ inputs.app_icon }}
-      run: |
-        RESOURCE=$RUNNER_TEMP/appicon
-        CROPPED=$RUNNER_TEMP/cropped.png
-        curl "$APPICON_URL" > "$RESOURCE"
-        magick "$RESOURCE" -resize 810x810 -matte iconmatte.png -compose DstIn -composite "$CROPPED"
-        magick "$CROPPED" \( +clone -background black -shadow 39x30+0+0 \) +swap -background none -layers merge +repage -gravity center -extent 1024x1024 appicon.png
+      - name: Set up wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4.0.3
 
-    - name: Set up wails
-      run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+      - name: Set up pnpm
+        run: npm i -g pnpm
 
-    - name: Set up NodeJS
-      uses: actions/setup-node@v4.0.3
+      - name: Build macOS
+        run: wails build
+        if: matrix.os == 'macos-latest'
 
-    - name: Set up pnpm
-      run: npm i -g pnpm
+      - name: Build Windows
+        run: |
+          bash ./app/geoip/download.sh
+          wails build -nsis
+        shell: bash
+        if: matrix.os == 'windows-latest'
 
-    - name: Build macOS
-      run: wails build
-      if: matrix.os == 'macos-latest'
-
-    - name: Build Windows
-      run: |
-        bash ./app/geoip/download.sh
-        wails build -nsis
-      shell: bash
-      if: matrix.os == 'windows-latest'
-
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4.3.6
-      with:
-        name: ${{ matrix.os }}
-        path: ./build/bin/*
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: ${{ matrix.os }}
+          path: ./build/bin/*
