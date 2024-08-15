@@ -91,10 +91,11 @@ jobs:
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
           
-          LAYOUT=app_config/dir_nodelve.go
-          cat "$LAYOUT" | sed "s/{{package name}}/$PACKAGE_NAME/" > "$RUNNER_TEMP/$LAYOUT"
-          rm "$LAYOUT"
-          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+          LAYOUT=dir_nodelve.go
+          FILE_NAME=app_config/$LAYOUT
+          cat "$FILE_NAME" | sed "s/{{package name}}/$PACKAGE_NAME/" > "$RUNNER_TEMP/$LAYOUT"
+          rm "$FILE_NAME"
+          mv "$RUNNER_TEMP/$LAYOUT" "$FILE_NAME"
 
       - name: Download app icons
         uses: actions/download-artifact@v4.1.8
