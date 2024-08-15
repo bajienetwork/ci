@@ -26,6 +26,8 @@ on:
         required: false
         type: string
 
+run-name: ${{ inputs.app_name }} Wails CI
+
 jobs:
   appicon:
     runs-on: ubuntu-latest

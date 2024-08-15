@@ -18,6 +18,8 @@ on:
         required: false
         type: string
 
+run-name: ${{ inputs.app_name }} Android CI
+
 jobs:
   build:
 
