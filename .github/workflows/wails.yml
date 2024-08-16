@@ -135,7 +135,7 @@ jobs:
           CERTIFICATE_NAME: ${{ secrets.DEVELOPER_ID_CERTIFICATE_NAME }} (${{ secrets.APPLE_TEAM_ID }})
         run: |
           # create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.cer
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           
           # import certificate and provisioning profile from secrets
