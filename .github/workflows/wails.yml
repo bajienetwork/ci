@@ -130,10 +130,9 @@ jobs:
 
       - name: Sign macOS
         env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_CERTIFICATE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          CERTIFICATE_NAME: ${{ secrets.CERTIFICATE_NAME }}
+          CERTIFICATE_NAME: ${{ secrets.DEVELOPER_ID_CERTIFICATE_NAME }} (${{ secrets.APPLE_TEAM_ID }})
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
@@ -148,7 +147,7 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           
           # import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -A -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
           
           # Use codesign to add code signature
