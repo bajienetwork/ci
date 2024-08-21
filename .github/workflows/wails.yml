@@ -25,6 +25,10 @@ on:
         description: '应用图标的URL'
         required: false
         type: string
+      sign_macos:
+        description: '签名Mac应用'
+        type: boolean
+        default: false
 
 run-name: ${{ inputs.app_name }} Wails CI
 
@@ -153,7 +157,7 @@ jobs:
           
           # Use codesign to add code signature
           codesign --force --sign "$CERTIFICATE_NAME" "build/bin/$PACKAGE_NAME.app"
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && inputs.sign_macos
 
       - name: Compress macOS
         working-directory: build/bin
