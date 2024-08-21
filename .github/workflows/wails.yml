@@ -130,7 +130,7 @@ jobs:
 
       - name: Build macOS
         run: wails build -platform darwin/universal -tags ${{ inputs.fetcher }}
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && inputs.sign_macos
 
       - name: Sign macOS
         env:
