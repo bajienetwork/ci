@@ -138,5 +138,5 @@ jobs:
         uses: actions/upload-artifact@v4.3.6
         with:
           name: android-latest
-          path: ./android/app/build/outputs/apk/meta-alpha/release/*
+          path: ./android/app/build/outputs/apk/release/*
         
