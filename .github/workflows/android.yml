@@ -132,7 +132,7 @@ jobs:
 
       - name: Build meta-alpha release
         working-directory: android
-        run: ./gradlew :app:assembleMeta-alphaRelease
+        run: ./gradlew :app:assembleRelease
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.3.6
