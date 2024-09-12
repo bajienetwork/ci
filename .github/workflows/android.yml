@@ -107,6 +107,10 @@ jobs:
         working-directory: android
         run: chmod +x gradlew
 
+      - name: Build CMake
+        working-directory: android
+        run: ./gradlew buildCMakeRelWithDebInfo
+
       - name: Set up signing options
         working-directory: android
         env:
