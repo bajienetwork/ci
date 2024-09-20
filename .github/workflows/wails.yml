@@ -86,12 +86,6 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git commit -a -m "Bump version name to $NEW"
-          
-          # Replace wails.json
-          LAYOUT=wails.json
-          cat "$LAYOUT" | sed "s/{{version name}}/$NEW/" > "$RUNNER_TEMP/$LAYOUT"
-          rm "$LAYOUT"
-          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
       - name: Push version changes
         uses: ad-m/github-push-action@master
@@ -121,8 +115,10 @@ jobs:
         env:
           APP_NAME: ${{ inputs.app_name }}
         run: |
+          # Replace app name, package name and version name
+          VERSION=$(cat const/version.go | grep 'VersionName = ' | awk '{split($0, a, "="); split(a[2], b, "\""); vername=b[2]; split(vername, verdigs, "."); print verdigs[1] "." verdigs[2]  "." verdigs[3]}')
           LAYOUT=wails.json
-          cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" | sed "s/{{package name}}/$PACKAGE_NAME/" > "$RUNNER_TEMP/$LAYOUT"
+          cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" | sed "s/{{package name}}/$PACKAGE_NAME/" | sed "s/{{version name}}/$VERSION/" > "$RUNNER_TEMP/$LAYOUT"
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
           
@@ -131,7 +127,7 @@ jobs:
           cat "$FILE_NAME" | sed "s/{{package name}}/$PACKAGE_NAME/" > "$RUNNER_TEMP/$LAYOUT"
           rm "$FILE_NAME"
           mv "$RUNNER_TEMP/$LAYOUT" "$FILE_NAME"
-
+          
       - name: Download app icons
         uses: actions/download-artifact@v4.1.8
         with:
