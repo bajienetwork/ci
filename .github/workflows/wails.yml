@@ -106,11 +106,13 @@ jobs:
           cat "$LAYOUT" | sed "s/{{version name}}/$NEW/" > "$RUNNER_TEMP/$LAYOUT"
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PAT }}
-          branch: ${{ github.ref }}
+          repository: 'bajienetwork/desktop'
+          force: true
 
       - name: Replace names
         shell: bash
