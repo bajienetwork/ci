@@ -99,6 +99,7 @@ jobs:
           rm "$FILE_NAME"
           mv "$RUNNER_TEMP/$LAYOUT" "$FILE_NAME"
           
+          git add const/version.go
           git commit -m "Bump version name to $NEW"
           git push
           
