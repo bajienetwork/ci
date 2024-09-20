@@ -33,7 +33,7 @@ on:
 run-name: ${{ inputs.app_name }} Wails CI
 
 jobs:
-  appicon:
+  appmeta:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,22 +69,6 @@ jobs:
           name: app_icons
           path: products/*
 
-  build:
-    strategy:
-      matrix:
-        os: [ macos-latest, windows-latest ]
-    runs-on: ${{ matrix.os }}
-    env:
-      PACKAGE_NAME: ${{ inputs.package_name }}
-    needs:
-      - appicon
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: 'bajienetwork/desktop'
-          token: ${{ secrets.PAT }}
-          submodules: recursive
-
       - name: Bump version name
         shell: bash
         run: |
@@ -99,6 +83,8 @@ jobs:
           rm "$FILE_NAME"
           mv "$RUNNER_TEMP/$LAYOUT" "$FILE_NAME"
           
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
           git commit -a -m "Bump version name to $NEW"
           
           # Replace wails.json
@@ -107,12 +93,28 @@ jobs:
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
-      - name: Push changes
+      - name: Push version changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PAT }}
           repository: 'bajienetwork/desktop'
           force: true
+
+  build:
+    strategy:
+      matrix:
+        os: [ macos-latest, windows-latest ]
+    runs-on: ${{ matrix.os }}
+    env:
+      PACKAGE_NAME: ${{ inputs.package_name }}
+    needs:
+      - appmeta
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'bajienetwork/desktop'
+          token: ${{ secrets.PAT }}
+          submodules: recursive
 
       - name: Replace names
         shell: bash
