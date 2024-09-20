@@ -36,6 +36,30 @@ jobs:
           token: ${{ secrets.PAT }}
           submodules: recursive
 
+      - name: Bump version name
+        working-directory: android
+        if: inputs.bump_version_name
+        run: |
+          OLD_NEW_VER=$(cat build.gradle.kts | grep 'versionName =' | awk '{split($0, a, "="); split(a[2], b, "\""); vername=b[2]; split(vername, verdigs, "."); print verdigs[1] "." verdigs[2]  "." verdigs[3]; print verdigs[1] "." verdigs[2]  "." verdigs[3]+1}')
+          OLD_VER=$(echo "$OLD_NEW_VER" | head -n 1)
+          NEW_VER=$(echo "$OLD_NEW_VER" | tail -n 1)
+          
+          OLD_NEW_BUILD=$(cat build.gradle.kts | grep 'versionCode =' | awk '{split($0, a, " = "); print a[2]; print a[2] + 1 }')
+          OLD_BUILD=$(echo "$OLD_NEW_BUILD" | head -n 1)
+          NEW_BUILD=$(echo "$OLD_NEW_BUILD" | tail -n 1)
+          
+          LAYOUT=build.gradle.kts
+          cat "$LAYOUT" | sed "s/versionName = \"$OLD_VER\"/versionName = \"$NEW_VER\"/" | sed "s/versionCode = $OLD_BUILD/versionName = $NEW_BUILD/" > "$RUNNER_TEMP/$LAYOUT"
+          rm "$LAYOUT"
+          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+
+      - name: Push version changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PAT }}
+          repository: 'bajienetwork/desktop'
+          force: true
+
       - name: Replace default fetcher
         working-directory: app
         env:
@@ -53,23 +77,6 @@ jobs:
         run: |
           LAYOUT=strings.xml
           cat "$LAYOUT" | sed "s/{{app name}}/$APP_NAME/" > "$RUNNER_TEMP/$LAYOUT"
-          rm "$LAYOUT"
-          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
-
-      - name: Bump version name
-        working-directory: android
-        if: inputs.bump_version_name
-        run: |
-          OLD_NEW_VER=$(cat build.gradle.kts | grep 'versionName =' | awk '{split($0, a, "="); split(a[2], b, "\""); vername=b[2]; split(vername, verdigs, "."); print verdigs[1] "." verdigs[2]  "." verdigs[3]; print verdigs[1] "." verdigs[2]  "." verdigs[3]+1}')
-          OLD_VER=$(echo "$OLD_NEW_VER" | head -n 1)
-          NEW_VER=$(echo "$OLD_NEW_VER" | tail -n 1)
-          
-          OLD_NEW_BUILD=$(cat build.gradle.kts | grep 'versionCode =' | awk '{split($0, a, " = "); print a[2]; print a[2] + 1 }')
-          OLD_BUILD=$(echo "$OLD_NEW_BUILD" | head -n 1)
-          NEW_BUILD=$(echo "$OLD_NEW_BUILD" | tail -n 1)
-          
-          LAYOUT=build.gradle.kts
-          cat "$LAYOUT" | sed "s/versionName = \"$OLD_VER\"/versionName = \"$NEW_VER\"/" | sed "s/versionCode = $OLD_BUILD/versionName = $NEW_BUILD/" > "$RUNNER_TEMP/$LAYOUT"
           rm "$LAYOUT"
           mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
 
