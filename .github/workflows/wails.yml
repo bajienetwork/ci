@@ -29,6 +29,10 @@ on:
         description: '签名Mac应用'
         type: boolean
         default: false
+      bump_version_name:
+        description: '自增版本号'
+        type: boolean
+        default: true
 
 run-name: ${{ inputs.app_name }} Wails CI
 
@@ -71,6 +75,7 @@ jobs:
 
       - name: Bump version name
         shell: bash
+        if: inputs.bump_version_name
         run: |
           OLD_NEW=$(cat const/version.go | grep 'VersionName = ' | awk '{split($0, a, "="); split(a[2], b, "\""); vername=b[2]; split(vername, verdigs, "."); print verdigs[1] "." verdigs[2]  "." verdigs[3]; print verdigs[1] "." verdigs[2]  "." verdigs[3]+1}')
           OLD=$(echo "$OLD_NEW" | head -n 1)
