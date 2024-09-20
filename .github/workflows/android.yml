@@ -55,9 +55,10 @@ jobs:
 
       - name: Push version changes
         uses: ad-m/github-push-action@master
+        if: inputs.bump_version_name
         with:
           github_token: ${{ secrets.PAT }}
-          repository: 'bajienetwork/desktop'
+          repository: 'bajienetwork/mobile'
           force: true
 
       - name: Replace default fetcher
