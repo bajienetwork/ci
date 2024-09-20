@@ -85,6 +85,29 @@ jobs:
           token: ${{ secrets.PAT }}
           submodules: recursive
 
+      - name: Bump version name
+        shell: bash
+        run: |
+          OLD_NEW=$(cat const/version.go | grep 'VersionName = ' | awk '{split($0, a, "="); split(a[2], b, "\""); vername=b[2]; split(vername, verdigs, "."); print verdigs[1] "." verdigs[2]  "." verdigs[3]; print verdigs[1] "." verdigs[2]  "." verdigs[3]+1}')
+          OLD=$(echo "$OLD_NEW" | head -n 1)
+          NEW=$(echo "$OLD_NEW" | tail -n 1)
+          
+          # Replace const/version.go
+          LAYOUT=version.go
+          FILE_NAME=const/$LAYOUT
+          cat "$FILE_NAME" | sed "s/$OLD/$NEW/" > "$RUNNER_TEMP/$LAYOUT"
+          rm "$FILE_NAME"
+          mv "$RUNNER_TEMP/$LAYOUT" "$FILE_NAME"
+          
+          git commit -m "Bump version name to $NEW"
+          git push
+          
+          # Replace wails.json
+          LAYOUT=wails.json
+          cat "$LAYOUT" | sed "s/{{version name}}/$NEW/" > "$RUNNER_TEMP/$LAYOUT"
+          rm "$LAYOUT"
+          mv "$RUNNER_TEMP/$LAYOUT" "$LAYOUT"
+
       - name: Replace names
         shell: bash
         env:
